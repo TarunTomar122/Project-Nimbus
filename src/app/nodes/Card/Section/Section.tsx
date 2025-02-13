@@ -23,7 +23,7 @@ export interface SectionProps {
 
 export default function Section(props: SectionProps) {
 
-    const { nodes, setNodes } = useGlobalState();
+    const { globalNodes, setGlobalNodes } = useGlobalState();
 
     const [rows, setRows] = useState<SectionRowProps[]>(props.rows);
 
@@ -34,7 +34,7 @@ export default function Section(props: SectionProps) {
     const addRow = () => {
         const newRow = { label: 'New row', id: generateId() };
         setRows([...rows, newRow]);
-            setNodes(nodes.map((node: CardProps) => {
+            setGlobalNodes(globalNodes.map((node: CardProps) => {
                 if (node.id === props.id) {
                     return { ...node, data: { ...node.data, attributes: [...node.data.attributes, newRow] } };
                 }
@@ -44,7 +44,7 @@ export default function Section(props: SectionProps) {
 
     const removeRow = (id: string) => {
         setRows(rows.filter((row) => row.id !== id));
-        setNodes(nodes.map((node: CardProps) => {
+        setGlobalNodes(globalNodes.map((node: CardProps) => {
             if (node.id === props.id) {
                 return { ...node, data: { ...node.data, attributes: node.data.attributes.filter((row: SectionRowProps) => row.id !== id) } };
             }

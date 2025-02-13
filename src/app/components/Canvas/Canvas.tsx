@@ -1,36 +1,32 @@
 import './styles.css';
 
-import { useState } from 'react';
+import { useCallback } from 'react';
 import {
     ReactFlow,
     addEdge,
     Background,
     Edge,
-    Connection,
     Controls,
     BackgroundVariant,
     MiniMap,
     NodeChange,
     EdgeChange,
     MarkerType,
-    Node,
     NodeTypes,
     ConnectionMode,
     applyNodeChanges,
-    applyEdgeChanges
+    applyEdgeChanges,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
 import Card from '../../nodes/Card/Card';
+import ContentViewer from '../../nodes/ContentViewer/ContentViewer';
 import { useGlobalState } from '../../utils/globalState';
 
-interface GlobalState {
-    nodes: any[];
-    setNodes: (nodes: any[]) => void;
-}
 
 const nodeTypes: NodeTypes = {
     card: Card as any,
+    contentViewer: ContentViewer as any,
 };
 
 const DEFAULT_EDGE_STYLE = {
@@ -61,46 +57,46 @@ const SELECTED_EDGE_STYLE = {
 
 function Flow() {
 
-    const { nodes, setNodes } = useGlobalState();
+    const {globalNodes, globalEdges, setGlobalNodes, setGlobalEdges} = useGlobalState();
 
-    const [edges, setEdges] = useState<Edge[]>([]);
+    const onEdgesChange = useCallback((changes: EdgeChange[]) => {
+        console.log("onEdgesChange", changes, globalEdges);
 
-    const onEdgesChange = (changes: EdgeChange[]) => {
-        setEdges((eds) => {
-            // Apply the changes to get the new edges
-            const newEdges = applyEdgeChanges(changes, eds);
-            
-            // Update the styles based on selection
-            return newEdges.map(edge => ({
-                ...edge,
-                style: edge.selected ? SELECTED_EDGE_STYLE : DEFAULT_EDGE_STYLE
-            }));
+        const newEdges = applyEdgeChanges(changes, globalEdges);
+
+        newEdges.forEach((edge) => {
+            if (edge.selected) {
+                edge.style = SELECTED_EDGE_STYLE;
+            } else {
+                edge.style = DEFAULT_EDGE_STYLE;
+            }
         });
-    };
+
+        setGlobalEdges(newEdges);
+        
+    }, [globalEdges, setGlobalEdges]);
 
     const onNodesChange = (changes: NodeChange[]) => {
-        setNodes(applyNodeChanges(changes, nodes));
+        setGlobalNodes(applyNodeChanges(changes, globalNodes));
     };
 
-    const onConnect = (params: any) => setEdges((eds) => {
-        // do not add edge if the source and target are the same
+    const onConnect = useCallback((params: any) => {
         if (params.source === params.target) {
-            return eds;
+            return;
         }
-
-        const newEdge = {
+        const newEdge: Edge = {
             ...params,
             style: DEFAULT_EDGE_STYLE
         };
-        
-        const newEdges = addEdge(newEdge, eds);
-        return newEdges;
-    });
+        const newEdges = addEdge(newEdge, globalEdges);
+
+        setGlobalEdges(newEdges);
+    }, [globalEdges, setGlobalEdges]);
 
     return (
         <ReactFlow
-            nodes={nodes}
-            edges={edges}
+            nodes={globalNodes}
+            edges={globalEdges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}

@@ -1,4 +1,4 @@
-import { Node, Handle, Position } from '@xyflow/react';
+import { Handle, Position } from '@xyflow/react';
 
 import './styles.css';
 
@@ -64,8 +64,6 @@ export default function Card(props: CardProps) {
     };
     const handleConfig = props.data.handleConfig || defaultHandleConfig;
 
-    // console.log('props', props);
-
     return (
          <div className='card'>
             {/* Add source handles */}
@@ -92,7 +90,7 @@ export default function Card(props: CardProps) {
 
             <div className='card-header'>
                 <EditableLabel 
-                    value="some value"
+                    value={props.data.name}
                     spanClassName='header-title' 
                     inputClassName='header-input' 
                 />

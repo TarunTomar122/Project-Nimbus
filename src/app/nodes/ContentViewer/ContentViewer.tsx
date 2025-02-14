@@ -1,4 +1,3 @@
-import { Handle, Position } from '@xyflow/react';
 import { useGlobalState } from '../../utils/globalState';
 import { useState, useEffect } from 'react';
 

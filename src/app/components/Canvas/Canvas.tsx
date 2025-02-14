@@ -7,7 +7,6 @@ import {
     Background,
     Edge,
     Controls,
-    BackgroundVariant,
     MiniMap,
     NodeChange,
     EdgeChange,
@@ -22,7 +21,6 @@ import '@xyflow/react/dist/style.css';
 import Card from '../../nodes/Card/Card';
 import ContentViewer from '../../nodes/ContentViewer/ContentViewer';
 import { useGlobalState } from '../../utils/globalState';
-
 
 const nodeTypes: NodeTypes = {
     card: Card as any,
@@ -66,9 +64,9 @@ function Flow() {
 
         newEdges.forEach((edge) => {
             if (edge.selected) {
-                edge.style = SELECTED_EDGE_STYLE;
+                (edge as any).style = SELECTED_EDGE_STYLE;
             } else {
-                edge.style = DEFAULT_EDGE_STYLE;
+                (edge as any).style = DEFAULT_EDGE_STYLE;
             }
         });
 

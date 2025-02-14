@@ -33,7 +33,7 @@ const generatePrompt = (nodes: Node[], edges: Edge[]) => `
 `;
 
 export const loadModel = async () => {
-    const genAI = new GoogleGenerativeAI("AIzaSyAyycEffMJ-NaBNgp4hYKulRFcKvH9vNIo");
+    const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY as string);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
   
     return model;

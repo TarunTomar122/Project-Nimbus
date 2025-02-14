@@ -1,7 +1,7 @@
 .toolbar {
     position: absolute;
-    top: 10vh;
-    left: 1vw;
+    top: 2vh;
+    left: 1.5vw;
     z-index: 101;
     display: flex;
     flex-direction: column;
@@ -12,7 +12,7 @@
 }
 
 .toolbar button {
-    background-color: transparent;
+    background-color: #f0f0f0;
     border: none;
     cursor: pointer;
     padding: 1vh;
@@ -22,5 +22,5 @@
 }
 
 .toolbar button:hover {
-    background-color: #f0f0f0;
+    background-color: #e2e0e0;
 }

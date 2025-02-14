@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { useGlobalState } from './globalState';
 import { Node, Edge } from '@xyflow/react';
-import { generateId } from './commons';
+import { generateId, findBestPosition } from './commons';
 
 interface Page {
     name: string;
@@ -45,30 +45,63 @@ export const generateCode = async (nodes: Node[], edges: Edge[]) => {
 
     const { setPages, globalNodes, setGlobalNodes } = useGlobalState.getState();
 
-    console.log('loaded the model');
-    const prompt = generatePrompt(nodes, edges);
-    const result = await model.generateContent(prompt);
-
-    const json = result.response.text().replace(/```json|```/g, '');
-    console.log('json', json);
-
-    // parse the json
-    const jsonObject = JSON.parse(json);
-    console.log('jsonObject', jsonObject);
-
-    // Store pages in global state
-    setPages(jsonObject.pages);
-
-    // Create ContentViewer nodes for each page
-    const contentViewerNodes = jsonObject.pages.map((page: Page, index: number) => ({
-        id: generateId(),
+    // Create initial loading node
+    const initialPosition = findBestPosition(globalNodes);
+    const loadingNodeId = generateId();
+    const loadingNode = {
+        id: loadingNodeId,
         type: 'contentViewer',
-        position: { x: 800, y: index * 400 }, // Stack them vertically with some spacing
-        data: { pageIndex: index }
-    }));
+        position: initialPosition,
+        data: { pageIndex: 0, isLoading: true }
+    };
 
-    // Add the new nodes to the canvas
-    setGlobalNodes([...globalNodes, ...contentViewerNodes]);
+    // Add the loading node to the canvas
+    setGlobalNodes([...globalNodes, loadingNode]);
 
-    return jsonObject.pages;
+    try {
+        console.log('loaded the model');
+        const prompt = generatePrompt(nodes, edges);
+        const result = await model.generateContent(prompt);
+
+        const json = result.response.text().replace(/```json|```/g, '');
+        console.log('json', json);
+
+        // parse the json
+        const jsonObject = JSON.parse(json) as { pages: Page[] };
+        console.log('jsonObject', jsonObject);
+
+        // Store pages in global state
+        setPages(jsonObject.pages);
+
+        // Create ContentViewer nodes sequentially to properly calculate positions
+        const contentViewerNodes: Node[] = [];
+        jsonObject.pages.forEach((page: Page, index: number) => {
+            // Calculate position based on all existing nodes and previously created content viewers
+            const allNodesForPosition = [...globalNodes, ...contentViewerNodes];
+            const position = findBestPosition(allNodesForPosition);
+            
+            contentViewerNodes.push({
+                id: index === 0 ? loadingNodeId : generateId(), // Reuse the loading node ID for first page
+                type: 'contentViewer',
+                position,
+                data: { pageIndex: index, isLoading: false }
+            });
+        });
+
+        // Update nodes, replacing the loading node and adding new nodes
+        const nodesWithoutLoading = globalNodes.filter(node => node.id !== loadingNodeId);
+        setGlobalNodes([...nodesWithoutLoading, ...contentViewerNodes]);
+
+        return jsonObject.pages;
+    } catch (error) {
+        // If there's an error, update the loading node to show error state
+        const updatedNodes = globalNodes.map(node => 
+            node.id === loadingNodeId 
+                ? { ...node, data: { pageIndex: 0, isLoading: false, error: true } }
+                : node
+        );
+        setGlobalNodes(updatedNodes);
+        console.error('Error generating content:', error);
+        throw error;
+    }
 };

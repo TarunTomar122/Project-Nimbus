@@ -113,7 +113,7 @@ function Flow() {
             snapGrid={[15, 15]}
             connectOnClick={false}
         >
-            <Background color="#ccc" size={1} variant={BackgroundVariant.Dots} />
+            <Background bgColor="#E9E9E9" color="#ccc" size={-1} />
             <Controls />
             <MiniMap 
                 nodeColor={() => DEFAULT_EDGE_STYLE.stroke}

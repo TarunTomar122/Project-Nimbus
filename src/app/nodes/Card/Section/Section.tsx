@@ -23,7 +23,7 @@ export interface SectionProps {
 
 export default function Section(props: SectionProps) {
 
-    const { globalNodes, setGlobalNodes } = useGlobalState();
+    const { globalNodes, setGlobalNodes, updateNodeData } = useGlobalState();
 
     const [rows, setRows] = useState<SectionRowProps[]>(props.rows);
 
@@ -32,14 +32,18 @@ export default function Section(props: SectionProps) {
     }, [props.rows]);
 
     const addRow = () => {
-        const newRow = { label: 'New row', id: generateId() };
+        const newRow = { label: `${props.label} ${rows.length + 1}`, id: generateId() };
         setRows([...rows, newRow]);
-            setGlobalNodes(globalNodes.map((node: CardProps) => {
-                if (node.id === props.id) {
+        setGlobalNodes(globalNodes.map((node: CardProps) => {
+            if (node.id === props.id) {
+                if(props.label === 'Attributes') {
                     return { ...node, data: { ...node.data, attributes: [...node.data.attributes, newRow] } };
+                } else if(props.label === 'Actions') {
+                    return { ...node, data: { ...node.data, actions: [...node.data.actions, newRow] } };
                 }
-                return node;
-            }));
+            }
+            return node;
+        }));
     };
 
     const removeRow = (id: string) => {
@@ -47,6 +51,20 @@ export default function Section(props: SectionProps) {
         setGlobalNodes(globalNodes.map((node: CardProps) => {
             if (node.id === props.id) {
                 return { ...node, data: { ...node.data, attributes: node.data.attributes.filter((row: SectionRowProps) => row.id !== id) } };
+            }
+            return node;
+        }));
+    };
+
+    const updateRowData = (id: string, updatedName: string) => {
+        setRows(rows.map((row) => row.id === id ? { ...row, label: updatedName } : row));
+        setGlobalNodes(globalNodes.map((node: CardProps) => {
+            if (node.id === props.id) {
+                if(props.label === 'Attributes') {
+                    return { ...node, data: { ...node.data, attributes: node.data.attributes.map((row: SectionRowProps) => row.id === id ? { ...row, label: updatedName } : row) } };
+                } else if(props.label === 'Actions') {
+                    return { ...node, data: { ...node.data, actions: node.data.actions.map((row: SectionRowProps) => row.id === id ? { ...row, label: updatedName } : row) } };
+                }
             }
             return node;
         }));
@@ -79,11 +97,8 @@ export default function Section(props: SectionProps) {
                         <EditableLabel 
                             id={row.id} 
                             value={row.label} 
-                            onChange={(updatedName: string) => {
-                                console.log('updatedName', row.id, row.label, updatedName);    
-                                if (row) {
-                                    
-                                }
+                            onComplete={(updatedName: string) => {
+                                updateRowData(row.id, updatedName);
                             }}
                             spanClassName='checkbox-title' inputClassName='checkbox-input' />
 

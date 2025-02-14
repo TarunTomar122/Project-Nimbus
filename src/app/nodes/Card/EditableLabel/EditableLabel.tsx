@@ -7,46 +7,44 @@ interface EditableLabelProps {
     value: string;
     spanClassName?: string;
     inputClassName?: string;
-    onChange?: (value: string) => void;
+    onComplete?: (value: string) => void;
 }
 
-export default function EditableLabel(props: EditableLabelProps) {
-    const [isEditing, setIsEditing] = useState(false);
-    const [text, setText] = useState(props.value);
+export default function EditableLabel({ value, onComplete, ...props }: EditableLabelProps) {
+    const [editing, setEditing] = useState(false);
+    const [localValue, setLocalValue] = useState(value);
 
-
-    const handleFocus = () => {
-        setIsEditing(true);
-    }
-
-    const handleBlur = () => {
-        setIsEditing(false);
-    }
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setText(e.target.value);
-        if (props.onChange) {
-            props.onChange(e.target.value);
+    const handleComplete = () => {
+        setEditing(false);
+        if (localValue !== value) {
+            onComplete?.(localValue);
         }
-    }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            handleComplete();
+        }
+    };
 
     useEffect(() => {
-        setText(props.value);
-    }, [props.value]);
+        setLocalValue(value);
+    }, [value]);
 
-    return (
-        <div className='editable-label'>
-            {isEditing ? (
-                <input
-                    id="input"
-                    value={text}
-                    className="nodrag"
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                />
-            ) : (
-                <span onClick={handleFocus} className={props.spanClassName}>{text}</span>
-            )}
-        </div>
-    )
+    return editing ? (
+        <input
+            id="input"
+            value={localValue}
+            className="nodrag"
+            onChange={(e) => setLocalValue(e.target.value)}
+            onBlur={handleComplete}
+            onKeyDown={handleKeyDown}
+            autoFocus
+            {...props}
+        />
+    ) : (
+        <span onClick={() => setEditing(true)} className={props.spanClassName}>
+            {localValue}
+        </span>
+    );
 }

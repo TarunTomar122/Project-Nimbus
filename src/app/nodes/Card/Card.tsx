@@ -4,6 +4,7 @@ import './styles.css';
 
 import EditableLabel from './EditableLabel/EditableLabel';
 import Section from './Section/Section';
+import { useGlobalState } from '../../utils/globalState';
 
 // Define handle styles
 const HANDLE_STYLES = {
@@ -54,6 +55,7 @@ export interface CardProps {
 }
 
 export default function Card(props: CardProps) {
+    const { updateNodeData } = useGlobalState();
     const defaultHandleConfig: NodeConfig = {
         sources: [
             { id: 'default-source', position: Position.Right, top: 40 }
@@ -63,6 +65,10 @@ export default function Card(props: CardProps) {
         ]
     };
     const handleConfig = props.data.handleConfig || defaultHandleConfig;
+
+    const handleNameUpdate = (newName: string) => {
+        updateNodeData(props.id, { ...props.data, name: newName });
+    };
 
     return (
          <div className='card'>
@@ -92,7 +98,8 @@ export default function Card(props: CardProps) {
                 <EditableLabel 
                     value={props.data.name}
                     spanClassName='header-title' 
-                    inputClassName='header-input' 
+                    inputClassName='header-input'
+                    onComplete={handleNameUpdate}
                 />
             </div>
 

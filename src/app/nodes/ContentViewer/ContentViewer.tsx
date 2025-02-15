@@ -17,7 +17,7 @@ export default function ContentViewer({ id, data, selected }: NodeProps) {
     const hasError = (data as ContentViewerNodeData).error || false;
     const containerRef = useRef<HTMLDivElement>(null);
     const tempDivRef = useRef<HTMLDivElement>(null);
-    const [dimensions, setDimensions] = useState({ width: 1800, height: 1236 });
+    const [dimensions, setDimensions] = useState({ width: 1800, height: 1200 });
 
     useEffect(() => {
         if (pages.length > 0 && pageIndex < pages.length) {
@@ -100,6 +100,8 @@ export default function ContentViewer({ id, data, selected }: NodeProps) {
         </div>
     );
 
+
+    // console.log("dimensions",dimensions);
     return (
         <>
             {selected && (
@@ -122,9 +124,10 @@ export default function ContentViewer({ id, data, selected }: NodeProps) {
                     border: '1px solid #d3d2d2',
                     borderRadius: '8px',
                     boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                    width: dimensions.width,
-                    height: dimensions.height,
-                    overflow: 'scroll'
+                    height: `${dimensions.height}px`,
+                    width: `${dimensions.width}px`,
+                    overflow: 'scroll',
+  
                 }}
             >
 
@@ -138,6 +141,8 @@ export default function ContentViewer({ id, data, selected }: NodeProps) {
                             style={{ 
                                 overflow: 'initial',
                                 border: '4px solid #f0f0f0',
+                                width: '100%',
+                                height: '100%'
                             }} 
                         />
                 )}

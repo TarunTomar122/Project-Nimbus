@@ -8,25 +8,28 @@ interface Page {
     svg: string;
 }
 
-const generatePrompt = (nodes: Node[], edges: Edge[]) => `
+const generatePrompt = (nodes: Node[], edges: Edge[], prompt: string) => `
   
-  You are an expert in creating figma ui like wireframes using html, tailwind, and javascript. 
+  You are an expert in creating figma ui like wireframes using html, tailwind, and javascript.
   You will be provided with a two JSON files (Nodes - the objects and Edges - the relationships between the objects) structured using the Object-Oriented UX (OOUX) methodology. 
   Your task is to analyze the objects, their attributes, actions, and relationships, then generate a complete 
   set of UI screens needed for the described application.
    Please make sure to create a separate UI screens for all the screens that might be needed based on your understanding of the app from the json file. 
-   don't use any other library than svg CSS tailwind and js. gimme separate files for all the screens that are needed. 
-   separate svg. 
+   don't use any other library than svg CSS tailwind. gimme separate files for all the screens that are needed. 
+   A single file should contain the entire UI for a single page and it should be a single html file. 
    please fill in details and imgs if required with the placeholder values from somewhere. 
    You can use the following for images - 
   cataas API - https://cataas.com/cat
   no commentary.
-  Gimme the svg files of those webpages as an array. You have to return a single json file which will contain an array of all the pages and the svg for all those pages. the json that you return should be in the following format - { pages: [{ name, svg }] } thank you
+  Gimme the html files of those webpages as an array. You have to return a single json file which will contain an array of all the pages 
+  and the html for all those pages. the json that you return should be in the following format - { pages: [{ name, html }] } thank you
   Do not create unnecessary or extra pages that are not explicitly mentioned in the jsons. 
-    
 
-  here's your jsons
-    Nodes:
+  Also the user who made this mapping has written the following prompt for your understanding - 
+  ${prompt}
+  and
+  here's your ooux mapping tool based jsons - 
+  Nodes:
   ${JSON.stringify(nodes)}
     Edges:
   ${JSON.stringify(edges)}
@@ -43,7 +46,7 @@ export const generateCode = async (nodes: Node[], edges: Edge[]) => {
     const model = await loadModel();
     if (!model) return;
 
-    const { setPages, globalNodes, setGlobalNodes } = useGlobalState.getState();
+    const { setPages, globalNodes, setGlobalNodes, prompt } = useGlobalState.getState();
 
     // Create initial loading node
     const initialPosition = findBestPosition(globalNodes);
@@ -60,8 +63,11 @@ export const generateCode = async (nodes: Node[], edges: Edge[]) => {
 
     try {
         console.log('loaded the model');
-        const prompt = generatePrompt(nodes, edges);
-        const result = await model.generateContent(prompt);
+        const finalPrompt = generatePrompt(nodes, edges, prompt);
+
+        console.log('finalPrompt', finalPrompt);
+
+        const result = await model.generateContent(finalPrompt);
 
         const json = result.response.text().replace(/```json|```/g, '');
         console.log('json', json);

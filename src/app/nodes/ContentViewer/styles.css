@@ -1,0 +1,28 @@
+.content-viewer {
+    position: relative;
+}
+
+/* Ensure styles from generated content are properly scoped */
+.rendered-html {
+    all: initial;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.rendered-html * {
+    max-width: 100%;
+}
+
+/* Reset some basic HTML elements within rendered content */
+.rendered-html h1,
+.rendered-html h2,
+.rendered-html h3,
+.rendered-html h4,
+.rendered-html h5,
+.rendered-html h6,
+.rendered-html p,
+.rendered-html div {
+    color: inherit;
+    font-family: inherit;
+    line-height: 1.5;
+    margin: 0.5em 0;
+}

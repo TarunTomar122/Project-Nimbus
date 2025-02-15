@@ -1,26 +1,58 @@
 import { useGlobalState } from '../../utils/globalState';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { NodeResizer, NodeProps } from '@xyflow/react';
+import './styles.css';
 
-interface ContentViewerProps {
-    data: {
-        pageIndex?: number;
-        isLoading?: boolean;
-        error?: boolean;
-    };
-}
+type ContentViewerNodeData = {
+    pageIndex: number;
+    isLoading?: boolean;
+    error?: boolean;
+};
 
-export default function ContentViewer({ data }: ContentViewerProps) {
-    const [currentSvg, setCurrentSvg] = useState<string>('');
+export default function ContentViewer({ id, data, selected }: NodeProps) {
+    const [currentHtml, setCurrentHtml] = useState<string>('');
     const { pages } = useGlobalState();
-    const pageIndex = data?.pageIndex || 0;
-    const isLoading = data?.isLoading || false;
-    const hasError = data?.error || false;
+    const pageIndex = (data as ContentViewerNodeData).pageIndex;
+    const isLoading = (data as ContentViewerNodeData).isLoading || false;
+    const hasError = (data as ContentViewerNodeData).error || false;
+    const containerRef = useRef<HTMLDivElement>(null);
+    const tempDivRef = useRef<HTMLDivElement>(null);
+    const [dimensions, setDimensions] = useState({ width: 1800, height: 1236 });
 
     useEffect(() => {
         if (pages.length > 0 && pageIndex < pages.length) {
-            setCurrentSvg(pages[pageIndex].svg);
+            setCurrentHtml(pages[pageIndex].html);
         }
     }, [pageIndex, pages]);
+
+    // Convert HTML to SVG when HTML content changes
+    useEffect(() => {
+        if (!currentHtml || !tempDivRef.current) return;
+        const tempDiv = tempDivRef.current;
+        tempDiv.innerHTML = currentHtml;
+        //     console.log("canvas",canvas);
+        //     document.body.appendChild(canvas);
+        // });
+        // Convert to SVG
+        // htmlToImage.toSvg(tempDiv, {
+        //     width: dimensions.width,
+        //     height: dimensions.height,
+        //     backgroundColor: 'white',
+        //     style: {
+        //         margin: '0',
+        //         padding: '0',
+        //     }
+        // })
+        // .then((svgString) => {
+        //     console.log("svgString",svgString);
+        //     setSvgContent(svgString);
+        //     // Clear the temp div
+        //     tempDiv.innerHTML = '';
+        // })
+        // .catch((error) => {
+        //     console.error('Error converting to SVG:', error);
+        // });
+    }, [currentHtml, dimensions.width, dimensions.height]);
 
     const LoadingSpinner = () => (
         <div style={{
@@ -69,32 +101,47 @@ export default function ContentViewer({ data }: ContentViewerProps) {
     );
 
     return (
-        <div className="content-viewer" style={{
-            background: 'white',
-            padding: '16px',
-            borderRadius: '8px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            width: '400px',
-            height: '400px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center'
-        }}>
-            <div className="svg-container" style={{
-                width: '100%',
-                height: '100%',
-                overflow: 'auto'
-            }}>
+        <>
+            {selected && (
+                <NodeResizer 
+                    isVisible={selected}
+                    lineStyle={{ border: '12px dotted #d3d2d2' }}
+                    handleStyle={{ width: 16, height: 16, backgroundColor: '#2196F3' }}
+                    onResize={(event, { width, height }) => {
+                        setDimensions({ width, height });
+                    }}
+                />
+            )}
+
+            <div 
+                ref={containerRef}
+                className="content-viewer"
+                style={{
+                    background: '#d3d2d2',
+                    padding: '0px',
+                    border: '1px solid #d3d2d2',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                    width: dimensions.width,
+                    height: dimensions.height,
+                    overflow: 'scroll'
+                }}
+            >
+
                 {isLoading ? (
-                    <LoadingSpinner />
-                ) : hasError ? (
-                    <ErrorMessage />
-                ) : (
-                    <div dangerouslySetInnerHTML={{ 
-                        __html: currentSvg || '<div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #666;">No SVG generated yet</div>' 
-                    }} />
+                        <LoadingSpinner />
+                    ) : hasError ? (
+                        <ErrorMessage />
+                    ) : (
+                        <div 
+                            ref={tempDivRef} 
+                            style={{ 
+                                overflow: 'initial',
+                                border: '4px solid #f0f0f0',
+                            }} 
+                        />
                 )}
             </div>
-        </div>
+        </>
     );
 }

@@ -6,7 +6,7 @@ import { generateCode } from '../../utils/inference';
 import { useState, useRef, useEffect } from 'react';
 
 function Toolbar() {
-    const { globalNodes, globalEdges, setGlobalNodes, prompt, setPrompt } = useGlobalState();
+    const { globalNodes, globalEdges, setGlobalNodes, prompt, setPrompt, saveToLocalStorage, loadFromLocalStorage, clearLocalStorage } = useGlobalState();
     const [openPromptBox, setOpenPromptBox] = useState(false);
     const [inputPrompt, setInputPrompt] = useState('');
     const promptContainerRef = useRef<HTMLDivElement>(null);
@@ -32,6 +32,21 @@ function Toolbar() {
             <button onClick={async () => await generateCode(globalNodes, globalEdges)}>
                 <svg className="h-6 w-6 text-cyan-500"  fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                </svg>
+            </button>
+            <button onClick={saveToLocalStorage} title="Save to localStorage">
+                <svg className="h-6 w-6 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                </svg>
+            </button>
+            <button onClick={loadFromLocalStorage} title="Load from localStorage">
+                <svg className="h-6 w-6 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+            </button>
+            <button onClick={clearLocalStorage} title="Clear localStorage">
+                <svg className="h-6 w-6 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
             </button>
             <div className="prompt-box-container" ref={promptContainerRef}>            

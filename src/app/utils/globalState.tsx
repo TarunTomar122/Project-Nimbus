@@ -17,6 +17,9 @@ interface GlobalState {
     setGlobalEdges: (edges: Edge[]) => void;
     setPages: (pages: Page[]) => void;
     setPrompt: (prompt: string) => void;
+    saveToLocalStorage: () => void;
+    loadFromLocalStorage: () => void;
+    clearLocalStorage: () => void;
 }
 
 export const useGlobalState = create<GlobalState>((set) => ({
@@ -111,6 +114,14 @@ export const useGlobalState = create<GlobalState>((set) => ({
     //     }
     // ],
     globalNodes: [
+        // {
+        //     id: '1',
+        //     type: 'contentViewer',
+        //     position: { x: 0, y: 0 },
+        //     data: {
+        //         pageIndex: 0,
+        //     }
+        // }
     ],
     globalEdges: [],
     pages: [],
@@ -139,108 +150,53 @@ export const useGlobalState = create<GlobalState>((set) => ({
 // <head>
 //     <meta charset="UTF-8">
 //     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-//     <title>Adult Sex Toys - Landing Page</title>
+//     <title>Product Detail</title>
 //     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-//     <style>
-//         /* Custom styles */
-//         .hero-section {
-//             background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
-//         }
-//         .product-card {
-//             transition: transform 0.3s ease-in-out;
-//         }
-//         .product-card:hover {
-//             transform: scale(1.05);
-//         }
-//     </style>
 // </head>
-// <body class="bg-gray-100 font-sans">
+// <body class="bg-gray-100 h-screen">
 
-//     <!-- Header -->
-//     <header class="bg-white shadow-md py-4">
-//         <div class="container mx-auto px-4 flex items-center justify-between">
-//             <a href="#" class="text-2xl font-bold text-indigo-600">Pleasure Palace</a>
+//     <header class="bg-blue-500 text-white p-4">
+//         <div class="container mx-auto flex justify-between items-center">
+//             <h1 class="text-xl font-bold">Product Detail</h1>
 //             <nav>
-//                 <ul class="flex space-x-6">
-//                     <li><a href="#" class="hover:text-indigo-500">Shop</a></li>
-//                     <li><a href="#" class="hover:text-indigo-500">About</a></li>
-//                     <li><a href="#" class="hover:text-indigo-500">Contact</a></li>
-//                     <li><a href="#" class="hover:text-indigo-500">Blog</a></li>
-//                 </ul>
+//                 <a href="#" class="hover:text-gray-200">Home</a>
+//                 <a href="#" class="ml-4 hover:text-gray-200">Cart</a>
+//                 <a href="#" class="ml-4 hover:text-gray-200">Logout</a>
 //             </nav>
-//             <div>
-//                 <a href="#" class="text-gray-600 hover:text-indigo-500 mr-4">Login</a>
-//                 <a href="#" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">Sign Up</a>
-//             </div>
 //         </div>
 //     </header>
 
-//     <!-- Hero Section -->
-//     <section class="hero-section py-20">
-//         <div class="container mx-auto px-4 text-center">
-//             <h1 class="text-5xl font-bold text-indigo-800 mb-6">Explore Your Sensuality</h1>
-//             <p class="text-xl text-gray-700 mb-8">Discover a world of pleasure and intimacy with our curated collection of adult toys.</p>
-//             <a href="#" class="bg-indigo-600 text-white px-8 py-3 rounded-md text-lg hover:bg-indigo-700">Shop Now</a>
-//         </div>
-//     </section>
+//     <main class="container mx-auto mt-8">
+//         <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+//             <h2 class="text-2xl font-bold mb-6">Product Information</h2>
 
-//     <!-- Featured Products -->
-//     <section class="py-12">
-//         <div class="container mx-auto px-4">
-//             <h2 class="text-3xl font-semibold text-gray-800 mb-8 text-center">Featured Products</h2>
-//             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+//             <div class="mb-4">
+//                 <label class="block text-gray-700 text-sm font-bold mb-2" for="label">
+//                     Label
+//                 </label>
+//                 <p>Product Name</p>
+//             </div>
 
-//                 <!-- Product 1 -->
-//                 <div class="product-card bg-white rounded-lg shadow-md p-4 hover:shadow-lg">
-//                     <img src="https://cataas.com/cat" alt="Product 1" class="w-full h-48 object-cover rounded-md mb-4">
-//                     <h3 class="text-xl font-semibold text-gray-800 mb-2">Vibrating Massager</h3>
-//                     <p class="text-gray-600 mb-4">Experience intense pleasure with our top-rated vibrating massager.</p>
-//                     <div class="flex items-center justify-between">
-//                         <span class="text-lg font-bold text-indigo-600">$49.99</span>
-//                         <a href="#" class="bg-indigo-500 text-white px-4 py-2 rounded-md hover:bg-indigo-600">Add to Cart</a>
-//                     </div>
-//                 </div>
+//             <div class="mb-4">
+//                 <label class="block text-gray-700 text-sm font-bold mb-2" for="price">
+//                     Price
+//                 </label>
+//                 <p>$50</p>
+//             </div>
 
-//                 <!-- Product 2 -->
-//                 <div class="product-card bg-white rounded-lg shadow-md p-4 hover:shadow-lg">
-//                     <img src="https://cataas.com/cat" alt="Product 2" class="w-full h-48 object-cover rounded-md mb-4">
-//                     <h3 class="text-xl font-semibold text-gray-800 mb-2">Couples' Pleasure Set</h3>
-//                     <p class="text-gray-600 mb-4">Enhance intimacy and explore new sensations with our couples' set.</p>
-//                     <div class="flex items-center justify-between">
-//                         <span class="text-lg font-bold text-indigo-600">$79.99</span>
-//                         <a href="#" class="bg-indigo-500 text-white px-4 py-2 rounded-md hover:bg-indigo-600">Add to Cart</a>
-//                     </div>
-//                 </div>
-
-//                 <!-- Product 3 -->
-//                 <div class="product-card bg-white rounded-lg shadow-md p-4 hover:shadow-lg">
-//                     <img src="https://cataas.com/cat" alt="Product 3" class="w-full h-48 object-cover rounded-md mb-4">
-//                     <h3 class="text-xl font-semibold text-gray-800 mb-2">Anal Beads Set</h3>
-//                     <p class="text-gray-600 mb-4">Discover new levels of stimulation with our premium anal beads set.</p>
-//                     <div class="flex items-center justify-between">
-//                         <span class="text-lg font-bold text-indigo-600">$39.99</span>
-//                         <a href="#" class="bg-indigo-500 text-white px-4 py-2 rounded-md hover:bg-indigo-600">Add to Cart</a>
-//                     </div>
-//                 </div>
-
+//             <div class="flex justify-between">
+//                 <button class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
+//                     Wishlist
+//                 </button>
+//                 <button class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
+//                     Buy Now
+//                 </button>
 //             </div>
 //         </div>
-//     </section>
+//     </main>
 
-//     <!-- Call to Action -->
-//     <section class="bg-indigo-100 py-12">
-//         <div class="container mx-auto px-4 text-center">
-//             <h2 class="text-3xl font-semibold text-indigo-800 mb-4">Ready to Explore?</h2>
-//             <p class="text-lg text-gray-700 mb-6">Sign up today and receive exclusive offers and discounts.</p>
-//             <a href="#" class="bg-indigo-600 text-white px-8 py-3 rounded-md text-lg hover:bg-indigo-700">Sign Up Now</a>
-//         </div>
-//     </section>
-
-//     <!-- Footer -->
-//     <footer class="bg-gray-200 py-6">
-//         <div class="container mx-auto px-4 text-center">
-//             <p class="text-gray-600">&copy; 2024 Pleasure Palace. All rights reserved.</p>
-//         </div>
+//     <footer class="bg-gray-200 text-center p-4">
+//         <p>&copy; 2023 Product Detail. All rights reserved.</p>
 //     </footer>
 
 // </body>
@@ -256,4 +212,24 @@ export const useGlobalState = create<GlobalState>((set) => ({
         const updatedNodes = state.globalNodes.map(node => node.id === nodeId ? { ...node, data } : node);
         return { globalNodes: updatedNodes };
     }),
+    saveToLocalStorage: () => {
+        const state = useGlobalState.getState();
+        localStorage.setItem('ooux-nodes', JSON.stringify(state.globalNodes));
+        localStorage.setItem('ooux-edges', JSON.stringify(state.globalEdges));
+    },
+    loadFromLocalStorage: () => {
+        const savedNodes = localStorage.getItem('ooux-nodes');
+        const savedEdges = localStorage.getItem('ooux-edges');
+        if (savedNodes) {
+            set({ globalNodes: JSON.parse(savedNodes) });
+        }
+        if (savedEdges) {
+            set({ globalEdges: JSON.parse(savedEdges) });
+        }
+    },
+    clearLocalStorage: () => {
+        localStorage.removeItem('ooux-nodes');
+        localStorage.removeItem('ooux-edges');
+        set({ globalNodes: [], globalEdges: [] });
+    }
 }));

@@ -5,17 +5,17 @@ import { generateId, findBestPosition } from './commons';
 
 interface Page {
     name: string;
-    svg: string;
+    html: string;
 }
 
 const generatePrompt = (nodes: Node[], edges: Edge[], prompt: string) => `
   
-  You are an expert in creating figma ui like wireframes using html, tailwind, and javascript.
+  You are an expert in creating UX pages using html,css, tailwind, and javascript.
   You will be provided with a two JSON files (Nodes - the objects and Edges - the relationships between the objects) structured using the Object-Oriented UX (OOUX) methodology. 
   Your task is to analyze the objects, their attributes, actions, and relationships, then generate a complete 
   set of UI screens needed for the described application.
    Please make sure to create a separate UI screens for all the screens that might be needed based on your understanding of the app from the json file. 
-   don't use any other library than svg CSS tailwind. gimme separate files for all the screens that are needed. 
+   Make sure to add header, footer, and sidebar if required. Make that consistent with the design system.
    A single file should contain the entire UI for a single page and it should be a single html file. 
    please fill in details and imgs if required with the placeholder values from somewhere. 
    You can use the following for images - 
@@ -23,7 +23,6 @@ const generatePrompt = (nodes: Node[], edges: Edge[], prompt: string) => `
   no commentary.
   Gimme the html files of those webpages as an array. You have to return a single json file which will contain an array of all the pages 
   and the html for all those pages. the json that you return should be in the following format - { pages: [{ name, html }] } thank you
-  Do not create unnecessary or extra pages that are not explicitly mentioned in the jsons. 
 
   Also the user who made this mapping has written the following prompt for your understanding - 
   ${prompt}

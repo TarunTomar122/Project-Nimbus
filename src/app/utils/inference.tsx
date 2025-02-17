@@ -5,7 +5,7 @@ import { generateId, findBestPosition } from './commons';
 
 interface Page {
     name: string;
-    svg: string;
+    html: string;
 }
 
 const generatePrompt = (nodes: Node[], edges: Edge[], prompt: string) => `
@@ -15,6 +15,7 @@ const generatePrompt = (nodes: Node[], edges: Edge[], prompt: string) => `
   Your task is to analyze the objects, their attributes, actions, and relationships, then generate a complete 
   set of UI screens needed for the described application.
    Please make sure to create a separate UI screens for all the screens that might be needed based on your understanding of the app from the json file. 
+   Make sure to add header, footer, and sidebar if required. Make that consistent with the design system.
    A single file should contain the entire UI for a single page and it should be a single html file. 
    please fill in details and imgs if required with the placeholder values from somewhere. 
    You can use the following for images - 

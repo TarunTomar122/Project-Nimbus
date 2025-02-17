@@ -34,6 +34,28 @@ const generatePrompt = (nodes: Node[], edges: Edge[], prompt: string) => `
   ${JSON.stringify(edges)}
 `;
 
+const generateReiterationPrompt = (selectedHtml: string, fullHtml: string, userPrompt: string) => `
+You are an expert in creating UX pages using HTML, CSS, Tailwind, and JavaScript.
+I have a webpage with the following HTML content:
+
+${fullHtml}
+
+The user has selected a specific part of this page:
+${selectedHtml}
+
+The user wants to modify this selected area with the following request:
+${userPrompt}
+
+Please generate a new version of the ENTIRE webpage HTML with the user's request that:
+1. Maintains the overall structure and consistency of the original page
+2. Updates the selected area according to the user's request
+3. Ensures the new content integrates seamlessly with the rest of the page
+4. Uses Tailwind CSS for styling
+5. Preserves any existing functionality and interactivity
+
+Return ONLY the complete HTML for the updated page. No explanations or comments needed.
+`;
+
 export const loadModel = async () => {
     const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY as string);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
@@ -108,5 +130,95 @@ export const generateCode = async (nodes: Node[], edges: Edge[]) => {
         setGlobalNodes(updatedNodes);
         console.error('Error generating content:', error);
         throw error;
+    }
+};
+
+export const reiterateContent = async (
+    selectedHtml: string[], 
+    fullHtml: string, 
+    userPrompt: string,
+    pageIndex: number
+) => {
+    const model = await loadModel();
+    if (!model) return;
+
+    const { setPages, pages, globalNodes, setGlobalNodes } = useGlobalState.getState();
+
+    // Calculate the new page index before creating any nodes
+    const newPageIndex = pages.length;
+
+    // Create initial loading node
+    const initialPosition = findBestPosition(globalNodes);
+    const loadingNodeId = generateId();
+    const loadingNode = {
+        id: loadingNodeId,
+        type: 'contentViewer',
+        position: initialPosition,
+        data: { pageIndex: newPageIndex, isLoading: true }
+    };
+
+    // Add the loading node to the canvas (keeping all existing nodes)
+    setGlobalNodes([...globalNodes, loadingNode]);
+
+    try {
+
+        const selectedHtmlString = selectedHtml[0];
+        const finalPrompt = generateReiterationPrompt(selectedHtmlString, fullHtml, userPrompt);
+        console.log('Reiteration Prompt:', finalPrompt);
+
+        const result = await model.generateContent(finalPrompt);
+        let newHtml = result.response.text();
+        console.log('newHtml', newHtml);
+        // Ensure the HTML has proper structure
+        if (!newHtml.includes('<!DOCTYPE html>')) {
+            newHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${pages[pageIndex].name} Reiteration</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body>
+    ${newHtml}
+</body>
+</html>`;
+        }
+
+        // Create a new page with the updated content
+        const newPage = {
+            name: `${pages[pageIndex].name}-reiteration-${newPageIndex}`,
+            html: newHtml
+        };
+
+        // Add the new page to pages array
+        const updatedPages = [...pages, newPage];
+        setPages(updatedPages);
+
+        // Create a new array with all existing nodes plus the updated loading node
+        const updatedNodes = [
+            ...globalNodes.filter(node => node.id !== loadingNodeId), // Keep all nodes except loading
+            {
+                ...loadingNode,
+                data: { pageIndex: newPageIndex, isLoading: false }
+            }
+        ];
+        setGlobalNodes(updatedNodes);
+
+        return newPage;
+    } catch (error) {
+        console.error('Error in reiteration:', error);
+        
+        // Update nodes, keeping all existing ones
+        const updatedNodes = [
+            ...globalNodes.filter(node => node.id !== loadingNodeId),
+            {
+                ...loadingNode,
+                data: { pageIndex: newPageIndex, isLoading: false, error: true }
+            }
+        ];
+        setGlobalNodes(updatedNodes);
+        
+        return null;
     }
 };

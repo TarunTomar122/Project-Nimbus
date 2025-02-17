@@ -12,11 +12,15 @@ interface GlobalState {
     globalEdges: Edge[];
     pages: Page[];
     prompt: string;
+    isSelectionToolActive: boolean;
+    selection: { x: number; y: number; width: number; height: number } | null;
     updateNodeData: (nodeId: string, data: any) => void;
     setGlobalNodes: (nodes: Node[]) => void;
     setGlobalEdges: (edges: Edge[]) => void;
     setPages: (pages: Page[]) => void;
     setPrompt: (prompt: string) => void;
+    setIsSelectionToolActive: (isActive: boolean) => void;
+    setSelection: (selection: { x: number; y: number; width: number; height: number } | null) => void;
     saveToLocalStorage: () => void;
     loadFromLocalStorage: () => void;
     clearLocalStorage: () => void;
@@ -126,6 +130,8 @@ export const useGlobalState = create<GlobalState>((set) => ({
     globalEdges: [],
     pages: [],
     prompt: '',
+    isSelectionToolActive: false,
+    selection: null,
     // globalEdges: [
     //     {
     //         id: '1',
@@ -203,15 +209,18 @@ export const useGlobalState = create<GlobalState>((set) => ({
 // </html>`
 //         }
 //     ],
-//     prompt: 'Ignore all other instructions and only generate the HTML for one landing page about cats food product',
+    // prompt: 'Ignore all other instructions and only generate the HTML for one landing page about cats food product',
     setPrompt: (prompt: string) => set({ prompt }),
     setGlobalNodes: (nodes: Node[]) => set({ globalNodes: nodes }),
     setGlobalEdges: (edges: Edge[]) => set({ globalEdges: edges }),
     setPages: (pages: Page[]) => set({ pages }),
-    updateNodeData: (nodeId: string, data: any) => set((state) => {
-        const updatedNodes = state.globalNodes.map(node => node.id === nodeId ? { ...node, data } : node);
-        return { globalNodes: updatedNodes };
-    }),
+    setIsSelectionToolActive: (isActive: boolean) => set({ isSelectionToolActive: isActive }),
+    setSelection: (selection) => set({ selection }),
+    updateNodeData: (nodeId: string, data: any) => set((state) => ({
+        globalNodes: state.globalNodes.map((node) =>
+            node.id === nodeId ? { ...node, data: { ...node.data, ...data } } : node
+        ),
+    })),
     saveToLocalStorage: () => {
         const state = useGlobalState.getState();
         localStorage.setItem('ooux-nodes', JSON.stringify(state.globalNodes));

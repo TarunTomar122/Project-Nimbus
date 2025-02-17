@@ -127,24 +127,23 @@ export default function ContentViewer({ id, data, selected }: NodeProps) {
                     height: `${dimensions.height}px`,
                     width: `${dimensions.width}px`,
                     overflow: 'scroll',
-  
                 }}
             >
-
                 {isLoading ? (
-                        <LoadingSpinner />
-                    ) : hasError ? (
-                        <ErrorMessage />
-                    ) : (
-                        <div 
-                            ref={tempDivRef} 
-                            style={{ 
-                                overflow: 'initial',
-                                border: '4px solid #f0f0f0',
-                                width: '100%',
-                                height: '100%'
-                            }} 
-                        />
+                    <LoadingSpinner />
+                ) : hasError ? (
+                    <ErrorMessage />
+                ) : (
+                    <div 
+                        ref={tempDivRef}
+                        className="content-viewer-content"
+                        style={{ 
+                            overflow: 'initial',
+                            border: '4px solid #f0f0f0',
+                            width: '100%',
+                            height: '100%'
+                        }} 
+                    />
                 )}
             </div>
         </>
